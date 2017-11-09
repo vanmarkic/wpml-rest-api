@@ -18,16 +18,16 @@ function wpmlrestapi_init() {
 	if (!is_plugin_active('sitepress-multilingual-cms/sitepress.php')) {
 		return;
 	}
-	
+
 	$available_langs = wpml_get_active_languages_filter('', array('skip_missing' => false, ) );
-		
+
 	if ( ! empty( $available_langs ) && ! isset( $GLOBALS['icl_language_switched'] ) || ! $GLOBALS['icl_language_switched'] ) {
 		if ( isset( $_REQUEST['wpml_lang'] ) ) {
 			$lang = $_REQUEST['wpml_lang'];
 		} else if ( isset( $_REQUEST['lang'] ) ) {
 			$lang = $_REQUEST['lang'];
 		}
-		
+
 		if ( isset( $lang ) && in_array( $lang, array_keys( $available_langs ) ) ) {
 			do_action( 'wpml_switch_language', $lang );
 		}
@@ -45,7 +45,7 @@ function wpmlrestapi_init() {
 
 function wpmlrestapi_register_api_field($post_type) {
 	register_rest_field( $post_type,
-		'wpml_current_locale',
+		'wpml_language_information',
 		array(
 			'get_callback'    => 'wpmlrestapi_slug_get_current_locale',
 			'update_callback' => null,
@@ -111,5 +111,5 @@ function wpmlrestapi_slug_get_translations( $object, $field_name, $request ) {
  */
 function wpmlrestapi_slug_get_current_locale( $object, $field_name, $request ) {
 	$langInfo = wpml_get_language_information($object);
-	return $langInfo['locale'];
+	return $langInfo;
 }
