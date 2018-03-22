@@ -8,6 +8,10 @@ Author: Shawn Hooper
 Author URI: https://profiles.wordpress.org/shooper
 */
 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit; // Exit if accessed directly
+}
+
 add_action( 'rest_api_init', 'wpmlrestapi_init', 1000);
 
 function wpmlrestapi_init() {
@@ -110,6 +114,71 @@ function wpmlrestapi_slug_get_translations( $object, $field_name, $request ) {
  * @return mixed
  */
 function wpmlrestapi_slug_get_current_locale( $object, $field_name, $request ) {
-	$langInfo = wpml_get_language_information($object);
+	$langInfo = apply_filters( 'wpml_post_language_details', NULL );
 	return $langInfo;
 }
+
+/**
+ * Edit Victor
+ */
+
+if ( !class_exists( 'WPML_REST_API' ) ) :
+
+	/**
+	 * WPML REST API class
+	 */
+
+	class WPML_REST_API {
+
+		public static function get_api_namespace() {
+			return 'wp/v2';
+		}
+
+		public static function get_plugin_namespace() {
+			return 'wpml-rest-api/v2';
+		}
+
+		public function register_routes() {
+
+			register_rest_route( self::get_plugin_namespace(), '/languages', array(
+					array(
+							'methods'  => WP_REST_Server::READABLE,
+							'callback' => array( $this, 'get_languages' ),
+					)
+			) );
+
+		}
+
+		public static function get_languages() {
+
+			$rest_url = trailingslashit( get_rest_url() . self::get_plugin_namespace() . '/languages/' );
+
+			$languages = array();
+			$languages['id'] = 1;
+			$languages['active_languages'] = apply_filters( 'wpml_active_languages', NULL );
+			$languages['wpml_default_language'] = apply_filters( 'wpml_default_language', NULL );
+			$languages['wpml_current_language'] = apply_filters( 'wpml_current_language', NULL );
+			$languages['meta']['links']['collection'] = $rest_url;
+			return $languages;
+		}
+
+	}
+
+endif;
+
+if ( ! function_exists ( 'wpml_rest_api_init' ) ) :
+
+	/**
+	 * Init WPML REST API routes.
+	 *
+	 */
+	function wpml_rest_api_init() {
+
+		$wpml_rest_api = new WPML_REST_API;
+		add_filter( 'rest_api_init', array( $wpml_rest_api, 'register_routes' ) );
+
+	}
+
+	add_action( 'init', 'wpml_rest_api_init' );
+
+endif;
