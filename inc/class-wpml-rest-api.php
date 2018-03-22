@@ -23,7 +23,7 @@ class WpmlRestApi
         register_rest_route(self::getPluginNamespace(), '/languages', array(
                 array(
                         'methods'  => \WP_REST_Server::READABLE,
-                        'callback' => array( $this, 'get_languages' ),
+                        'callback' => array( $this, 'getLanguages' ),
                 )
         ));
     }
