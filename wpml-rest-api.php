@@ -90,24 +90,30 @@ function wpmlrestapi_slug_get_translations($object, $field_name, $request)
     $translations = [];
 
     foreach ($languages as $language) {
-        $post_id = wpml_object_id_filter($object['id'], 'post', false, $language['language_code']);
-        if ($post_id === null || $post_id == $object['id']) {
+        $post_id = apply_filters('wpml_object_id', $object['id'], $object['type'], false, $language['language_code']);
+
+        $skip_missing = (bool) !apply_filters('wpml_setting', true, 'icl_lso_link_empty');
+
+        if ($post_id === null && $skip_missing) {
             continue;
         }
-        $thisPost = get_post($post_id);
 
-        $href= apply_filters('WPML_filter_link', $language[ 'url' ], $language);
-        if (strpos($href, '?') !== false) {
-            $href = str_replace('?', '/' . $thisPost->post_name . '/?', $href);
-        } else {
-            if (substr($href, -1) !== '/') {
-                $href .= '/';
-            }
+        $post = get_post($post_id);
 
-            $href .= $thisPost->post_name . '/';
-        }
+        $href= apply_filters('wpml_ls_language_url', $language[ 'url' ], $language);
 
-        $translations[] = array('locale' => $language['default_locale'], 'id' => $thisPost->ID, 'post_title' => $thisPost->post_title, 'href' => $href);
+        $translations[] = array(
+            'post_id' => $post_id,
+            'post_title' => $post_id ? $post->post_title : null,
+            'slug' => $post_id ? $post->post_name : null,
+            'path' => wp_parse_url($post_id ? get_permalink($post) : $language['url'], PHP_URL_PATH),
+            'langugage_code' => $language['language_code'],
+            'locale' => $language['default_locale'],
+            'native_name' => $language['native_name'],
+            'translated_name' => $language['translated_name'],
+            'active' => (bool) $language['active'],
+            'url' => $post_id ? get_permalink($post_id) : $language['url'],
+        );
     }
 
     return $translations;
