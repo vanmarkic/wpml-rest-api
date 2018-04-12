@@ -23,7 +23,7 @@ function wpmlrestapi_init()
     // Check if WPML is installed
     include_once(ABSPATH . 'wp-admin/includes/plugin.php');
 
-    if (!is_plugin_active('sitepress-multilingual-cms/sitepress.php')) {
+    if (!class_exists('Sitepress')) {
         return;
     }
 
