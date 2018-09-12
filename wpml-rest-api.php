@@ -45,7 +45,7 @@ function wpmlrestapi_init()
     // Thanks to Roy Sivan for this trick.
     // http://www.roysivan.com/wp-api-v2-adding-fields-to-all-post-types/#.VsH0e5MrLcM
 
-    $post_types = get_post_types(array( 'public' => true, 'exclude_from_search' => false ), 'names');
+    $post_types = get_post_types(array( 'exclude_from_search' => false ), 'names');
     foreach ($post_types as $post_type) {
         wpmlrestapi_register_api_field($post_type);
     }
